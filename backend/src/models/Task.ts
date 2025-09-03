@@ -27,5 +27,5 @@ const TaskSchema: Schema = new Schema<Task>(
   },
   { timestamps: true }
 );
-console.log(TaskSchema, "TaskSchema");
+
 export default mongoose.model<Task>("Task", TaskSchema);
