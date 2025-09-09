@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchTasks } from "../services/fetchApi";
+import { fetchTasks, deleteTask } from "../services/fetchApi";
 import { Button, Typography } from "@mui/material";
 import type { Task } from "../types/task";
 import AddTask from "./AddTask";
@@ -25,6 +25,15 @@ const TaskTable = () => {
   const addTask = (newTask: Task) => {
     setTasks((prevTask) => [newTask, ...prevTask]);
   };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteTask(id); // call backend
+      setTasks((prev) => prev.filter((task) => task._id !== id)); // remove from state
+    } catch (err) {
+      console.error(err);
+    }
+  };
   if (loading) return <p>loading</p>;
 
   return (
@@ -37,7 +46,7 @@ const TaskTable = () => {
           {tasks.map((task) => (
             <li key={task._id}>
               <strong>{task.title}</strong> — ({task.priority})
-              <Button>delete</Button>
+              <Button onClick={() => handleDelete(task._id)}>Delete</Button>
             </li>
           ))}
         </ul>
