@@ -20,7 +20,7 @@ const TaskTable = () => {
       }
     };
     getData();
-  }, []);
+  }, [[tasks]]);
 
   const addTask = (newTask: Task) => {
     setTasks((prevTask) => [newTask, ...prevTask]);

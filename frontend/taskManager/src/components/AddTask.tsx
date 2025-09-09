@@ -24,7 +24,9 @@ const AddTask = ({ onTaskAdded }: { onTaskAdded: (task: Task) => void }) => {
     try {
       const newTask = await createTasks({ title, priority, dueDate });
 
-      onTaskAdded(newTask);
+      if (newTask && newTask._id) {
+        onTaskAdded(newTask);
+      }
       setTitle("");
       setPriority("medium");
       setDueDate("");
