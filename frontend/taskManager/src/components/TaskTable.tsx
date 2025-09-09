@@ -21,17 +21,22 @@ const TaskTable = () => {
     };
     getData();
   }, []);
+
+  const addTask = (newTask: Task) => {
+    setTasks((prevTask) => [newTask, ...prevTask]);
+  };
   if (loading) return <p>loading</p>;
+
   return (
     <>
       <div>
         <Typography variant="h1">Task Manager</Typography>
-        <AddTask />
+        <AddTask onTaskAdded={addTask} />
 
         <ul>
           {tasks.map((task) => (
             <li key={task._id}>
-              <strong>{task.title}</strong> — {task.status} ({task.priority})
+              <strong>{task.title}</strong> — ({task.priority})
               <Button>delete</Button>
             </li>
           ))}

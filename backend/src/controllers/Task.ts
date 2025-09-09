@@ -7,10 +7,9 @@ import { Console, error } from "console";
 const app = express();
 
 app.use(express.json());
-const schema = Joi.object({
-  title: Joi.string().min(3).required(),
-  description: Joi.string().min(3).required(),
-});
+// const schema = Joi.object({
+//   title: Joi.string().min(3).required(),
+// });
 
 export const getTask = async (req: Request, res: Response) => {
   try {
@@ -36,15 +35,15 @@ export const getTaskId = async (req: Request, res: Response) => {
 
 export const createPost = async (req: Request, res: Response) => {
   try {
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return res
-        .status(400)
-        .json({ success: false, error: error.details[0].message });
-    }
+    // const { error } = schema.validate(req.body);
+    // if (error) {
+    //   return res
+    //     .status(400)
+    //     .json({ success: false, error: error.details[0].message });
+    // }
     const task = await Task.create(req.body);
-
-    res.status(201).json({ success: true, data: task });
+    const savedTask = await task.save();
+    res.status(201).json({ success: true, data: savedTask });
   } catch (err) {
     console.error("error creating task ");
     res.status(500).json({ error: "Failed to create task" });
@@ -53,12 +52,12 @@ export const createPost = async (req: Request, res: Response) => {
 
 export const updatingTask = async (req: Request, res: Response) => {
   try {
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return res
-        .status(400)
-        .json({ success: false, error: error.details[0].message });
-    }
+    // const { error } = schema.validate(req.body);
+    // if (error) {
+    //   return res
+    //     .status(400)
+    //     .json({ success: false, error: error.details[0].message });
+    // }
     const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
