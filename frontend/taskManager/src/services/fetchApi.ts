@@ -50,3 +50,20 @@ export const deleteTask = async (id: string) => {
     throw err;
   }
 };
+
+export const updateTask = async (id: string, updates: Partial<Task>) => {
+  try {
+    const response = await fetch(`${url}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    if (!response.ok) {
+      throw new Error("FAILED TO FETCH");
+    }
+    const result = await response.json();
+    return result;
+  } catch (err) {
+    console.error("Failed to update task:", err);
+  }
+};

@@ -1,12 +1,26 @@
 import { useEffect, useState } from "react";
-import { fetchTasks, deleteTask } from "../services/fetchApi";
-import { Button, Typography } from "@mui/material";
+import { fetchTasks, deleteTask, updateTask } from "../services/fetchApi";
+import {
+  Button,
+  TableContainer,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  MenuItem,
+} from "@mui/material";
 import type { Task } from "../types/task";
 import AddTask from "./AddTask";
 
 const TaskTable = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<Partial<Task>>({});
 
   useEffect(() => {
     const getData = async () => {
@@ -28,8 +42,36 @@ const TaskTable = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteTask(id); // call backend
-      setTasks((prev) => prev.filter((task) => task._id !== id)); // remove from state
+      await deleteTask(id);
+      setTasks((prev) => prev.filter((task) => task._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const startEditing = (task: Task) => {
+    setEditingId(task._id);
+    setEditValues({
+      title: task.title,
+      priority: task.priority,
+      dueDate: task.dueDate,
+      status: task.status,
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditValues({});
+  };
+  const handleUpdate = async (id: string) => {
+    try {
+      const updatedTask = await updateTask(id, editValues);
+
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => (task._id === id ? updatedTask : task))
+      );
+      setEditingId(null);
+      console.log("updatedTask", updateTask);
     } catch (err) {
       console.error(err);
     }
@@ -38,19 +80,137 @@ const TaskTable = () => {
 
   return (
     <>
-      <div>
-        <Typography variant="h1">Task Manager</Typography>
-        <AddTask onTaskAdded={addTask} />
+      <Typography variant="h4" gutterBottom>
+        Task Manager
+      </Typography>
+      <AddTask onTaskAdded={addTask} />
 
-        <ul>
-          {tasks.map((task) => (
-            <li key={task._id}>
-              <strong>{task.title}</strong> — ({task.priority})
-              <Button onClick={() => handleDelete(task._id)}>Delete</Button>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <TableContainer component={Paper} sx={{ mt: 2 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Due Date</TableCell>
+              <TableCell>Title</TableCell>
+              <TableCell>Priority</TableCell>
+
+              <TableCell>Status</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {tasks.map((task) => (
+              <TableRow key={task._id}>
+                <TableCell>
+                  {editingId === task._id ? (
+                    <TextField
+                      type="date"
+                      size="small"
+                      value={editValues.dueDate || ""}
+                      onChange={(e) =>
+                        setEditValues({
+                          ...editValues,
+                          dueDate: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    task.dueDate || "No due date"
+                  )}
+                </TableCell>
+                <TableCell>
+                  {editingId === task._id ? (
+                    <TextField
+                      size="small"
+                      value={editValues.title || ""}
+                      onChange={(e) =>
+                        setEditValues({ ...editValues, title: e.target.value })
+                      }
+                    />
+                  ) : (
+                    task.title
+                  )}
+                </TableCell>
+                <TableCell>
+                  {editingId === task._id ? (
+                    <TextField
+                      size="small"
+                      value={editValues.status || ""}
+                      onChange={(e) =>
+                        setEditValues({ ...editValues, title: e.target.value })
+                      }
+                    />
+                  ) : (
+                    task.status
+                  )}
+                </TableCell>
+
+                <TableCell>
+                  {editingId === task._id ? (
+                    <TextField
+                      select
+                      size="small"
+                      value={editValues.priority || "low"}
+                      onChange={(e) =>
+                        setEditValues({
+                          ...editValues,
+                          priority: e.target.value as "low" | "medium" | "high",
+                        })
+                      }
+                    >
+                      <MenuItem value="low">Low</MenuItem>
+                      <MenuItem value="medium">Medium</MenuItem>
+                      <MenuItem value="high">High</MenuItem>
+                    </TextField>
+                  ) : (
+                    task.priority
+                  )}
+                </TableCell>
+
+                <TableCell>
+                  {editingId === task._id ? (
+                    <>
+                      <Button
+                        onClick={() => handleUpdate(task._id)}
+                        variant="contained"
+                        size="small"
+                        sx={{ mr: 1 }}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        onClick={cancelEditing}
+                        variant="outlined"
+                        size="small"
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={() => startEditing(task)}
+                        variant="outlined"
+                        size="small"
+                        sx={{ mr: 1 }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => handleDelete(task._id)}
+                        variant="contained"
+                        color="error"
+                        size="small"
+                      >
+                        Delete
+                      </Button>
+                    </>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </>
   );
 };
