@@ -18,6 +18,7 @@ import AddTask from "./AddTask";
 
 const TaskTable = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<Task>>({});
@@ -71,7 +72,6 @@ const TaskTable = () => {
         prevTasks.map((task) => (task._id === id ? updatedTask : task))
       );
       setEditingId(null);
-      console.log("updatedTask", updateTask);
     } catch (err) {
       console.error(err);
     }
@@ -85,15 +85,14 @@ const TaskTable = () => {
       </Typography>
       <AddTask onTaskAdded={addTask} />
 
-      <TableContainer component={Paper} sx={{ mt: 2 }}>
+      <TableContainer component={Paper} sx={{ mt: 4 }}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Due Date</TableCell>
               <TableCell>Title</TableCell>
-              <TableCell>Priority</TableCell>
-
               <TableCell>Status</TableCell>
+              <TableCell>Priority</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -105,7 +104,11 @@ const TaskTable = () => {
                     <TextField
                       type="date"
                       size="small"
-                      value={editValues.dueDate || ""}
+                      value={
+                        editValues.dueDate
+                          ? editValues.dueDate.split("T")[0]
+                          : ""
+                      }
                       onChange={(e) =>
                         setEditValues({
                           ...editValues,
@@ -133,12 +136,23 @@ const TaskTable = () => {
                 <TableCell>
                   {editingId === task._id ? (
                     <TextField
+                      select
                       size="small"
-                      value={editValues.status || ""}
+                      value={editValues.status || "pending"}
                       onChange={(e) =>
-                        setEditValues({ ...editValues, title: e.target.value })
+                        setEditValues({
+                          ...editValues,
+                          status: e.target.value as
+                            | "pending"
+                            | "in-progress"
+                            | "completed",
+                        })
                       }
-                    />
+                    >
+                      <MenuItem value="pending">Pending</MenuItem>
+                      <MenuItem value="in_progress">In_Progress</MenuItem>
+                      <MenuItem value="completed">Completed</MenuItem>
+                    </TextField>
                   ) : (
                     task.status
                   )}

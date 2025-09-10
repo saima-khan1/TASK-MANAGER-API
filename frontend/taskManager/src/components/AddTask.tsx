@@ -44,7 +44,7 @@ const AddTask = ({ onTaskAdded }: { onTaskAdded: (task: Task) => void }) => {
           border: "1px solid #ccc",
           borderRadius: "6px",
         }}
-        placeholder="Task title"
+        placeholder="Add new task"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
